@@ -39,11 +39,14 @@ export default function App() {
     setEmailText(content);
 
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailText: content }),
-      });
+     const response = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/analyze`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ emailText: content }),
+  }
+);
       
       const data = await response.json();
       console.log("Gemini Response:", data);
@@ -163,7 +166,7 @@ const logout = () => {
   accessToken={accessToken}
  onAnalyze={async (email) => {
   try {
-    const response = await fetch("/api/email", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

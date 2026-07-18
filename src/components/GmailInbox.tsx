@@ -32,7 +32,7 @@ const [loading, setLoading] = useState(true);
 useEffect(() => {
   async function loadEmails() {
     try {
-      const response = await fetch("/api/gmail", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
