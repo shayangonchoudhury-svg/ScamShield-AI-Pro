@@ -15,15 +15,18 @@ async function startServer() {
   app.use(express.json());
 
   // API endpoints FIRST
-  app.post("/api/gmail", async (req, res) => {
 
+
+app.post("/api/gmail", async (req, res) => {
   console.log("✅ /api/gmail endpoint hit");
 
   try {
     const { accessToken } = req.body;
 
     if (!accessToken) {
-      return res.status(400).json({ error: "Missing access token" });
+      return res.status(400).json({
+        error: "Missing access token",
+      });
     }
 
     const auth = new google.auth.OAuth2();
@@ -42,14 +45,14 @@ async function startServer() {
     });
 
     interface GmailEmail {
-  id: string;
-  sender: string;
-  subject: string;
-  date: string;
-  snippet: string;
-}
+      id: string;
+      sender: string;
+      subject: string;
+      date: string;
+      snippet: string;
+    }
 
-const emails: GmailEmail[] = [];
+    const emails: GmailEmail[] = [];
 
     for (const msg of messages.data.messages || []) {
       const full = await gmail.users.messages.get({
@@ -60,110 +63,35 @@ const emails: GmailEmail[] = [];
       const headers = full.data.payload?.headers || [];
 
       const getHeader = (name: string) =>
-    headers.find(
-        h => h.name?.toLowerCase() === name.toLowerCase()
-    )?.value ?? "";
+        headers.find(
+          (h) => h.name?.toLowerCase() === name.toLowerCase()
+        )?.value ?? "";
 
       emails.push({
-        id: msg.id,
+        id: msg.id!,
         sender: getHeader("From"),
         subject: getHeader("Subject"),
         date: getHeader("Date"),
-        snippet: full.data.snippet,
+        snippet: full.data.snippet ?? "",
       });
     }
 
-    res.json(emails);
+    return res.json(emails);
 
   } catch (err: any) {
-  console.error("=== Gmail API Error ===");
-  console.error(err);
-
-  if (err.response?.data) {
-    console.error(
-      "Google Response:",
-      JSON.stringify(err.response.data, null, 2)
-    );
-  }
-
-  res.status(500).json({
-    error: err.message,
-    details: err.response?.data || null,
-  });
-}
-
-app.post("/api/email", async (req, res) => {
-  try {
-    const { accessToken, messageId } = req.body;
-
-    if (!accessToken || !messageId) {
-      return res.status(400).json({
-        error: "Missing access token or message ID",
-      });
-    }
-
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({
-      access_token: accessToken,
-    });
-
-    const gmail = google.gmail({
-      version: "v1",
-      auth,
-    });
-
-    const message = await gmail.users.messages.get({
-      userId: "me",
-      id: messageId,
-      format: "full",
-    });
-
-    const headers = message.data.payload?.headers || [];
-
-    const getHeader = (name: string) =>
-      headers.find(
-        h => h.name?.toLowerCase() === name.toLowerCase()
-      )?.value || "";
-
-    function decodeBase64(data?: string) {
-      if (!data) return "";
-
-      return Buffer.from(
-        data.replace(/-/g, "+").replace(/_/g, "/"),
-        "base64"
-      ).toString("utf8");
-    }
-
-    let body = "";
-
-    if (message.data.payload?.body?.data) {
-      body = decodeBase64(message.data.payload.body.data);
-    } else if (message.data.payload?.parts) {
-      for (const part of message.data.payload.parts) {
-        if (
-          part.mimeType === "text/plain" &&
-          part.body?.data
-        ) {
-          body = decodeBase64(part.body.data);
-          break;
-        }
-      }
-    }
-
-    console.log(body);
-    res.json({
-      id: messageId,
-      sender: getHeader("From"),
-      subject: getHeader("Subject"),
-      date: getHeader("Date"),
-      body,
-    });
-
-  } catch (err: any) {
+    console.error("=== Gmail API Error ===");
     console.error(err);
 
-    res.status(500).json({
+    if (err.response?.data) {
+      console.error(
+        "Google Response:",
+        JSON.stringify(err.response.data, null, 2)
+      );
+    }
+
+    return res.status(500).json({
       error: err.message,
+      details: err.response?.data || null,
     });
   }
 });
@@ -298,7 +226,7 @@ ${emailText}
 ----------------------------------------`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
           systemInstruction,
