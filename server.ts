@@ -75,11 +75,22 @@ const emails: GmailEmail[] = [];
 
     res.json(emails);
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch Gmail" });
+  } catch (err: any) {
+  console.error("=== Gmail API Error ===");
+  console.error(err);
+
+  if (err.response?.data) {
+    console.error(
+      "Google Response:",
+      JSON.stringify(err.response.data, null, 2)
+    );
   }
-});
+
+  res.status(500).json({
+    error: err.message,
+    details: err.response?.data || null,
+  });
+
 
 app.post("/api/email", async (req, res) => {
   try {
