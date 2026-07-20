@@ -90,7 +90,7 @@ const emails: GmailEmail[] = [];
     error: err.message,
     details: err.response?.data || null,
   });
-
+}
 
 app.post("/api/email", async (req, res) => {
   try {
