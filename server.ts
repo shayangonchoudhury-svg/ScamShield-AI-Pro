@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -12,6 +13,13 @@ async function startServer() {
   const PORT = 3000;
 
   // Body parsing middleware
+   app.use(cors({
+    origin: [
+      "http://localhost:5173",
+      "https://scam-shield-ai-pro.vercel.app",
+    ],
+    credentials: true,
+  }));
   app.use(express.json());
 
   // API endpoints FIRST
